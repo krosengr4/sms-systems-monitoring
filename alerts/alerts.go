@@ -2,7 +2,6 @@ package alerts
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/caarlos0/env"
 	"github.com/joho/godotenv"
@@ -11,18 +10,14 @@ import (
 
 // config struct
 type Config struct {
+	EmailFrom string `env:"EMAIL_FROM"`
+	EmailTo   string `env:"EMAIL_TO"`
+
 	SmtpServer   string `env:"SMTP_SERVER"`
 	SmtpPort     string `env:"SMTP_PORT"`
 	SmtpUser     string `env:"SMTP_USER"`
 	SmtpPassword string `env:"SMTP_PASSWORD"`
 }
-
-const (
-	MemoryThreshold  = 70               // Memory % Alert Threshold
-	MemCheckInterval = 5 * time.Second  // Check Memory every 5s
-	BatteryThreshold = 30               // Batter % Alert Threshold
-	BatCheckInterval = 60 * time.Second // Check Battery Every Min
-)
 
 func SendCPUAlert(cpuUsage float64) {
 
@@ -57,6 +52,14 @@ func ConfigSMTP() (*Config, error) {
 
 // Validate the configuration
 func (c *Config) Validate() error {
+	if c.EmailFrom == "" {
+		return fmt.Errorf("EMAIL_FROM is required")
+	}
+
+	if c.EmailTo == "" {
+		return fmt.Errorf("EMAIL_TO is required")
+	}
+
 	if c.SmtpServer == "" {
 		return fmt.Errorf("SMTP_SERVER is required")
 	}
