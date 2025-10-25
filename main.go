@@ -54,19 +54,41 @@ func sendCpuAlert(cpuUsage float64) {
 	body := fmt.Sprintf("The CPU usage on %s has exceeded %.2f. Current Usage: %.2f", ComputerMonitoring, MemoryThreshold, cpuUsage)
 	message := fmt.Sprintf("Subject: %s\r\n\n\n%s", subject, body)
 
-	smtpConfig, err := alerts.ConfigSMTP()
+	smtp, err := alerts.ConfigSMTP()
 	if err != nil {
 		log.Warn().Err(err).Msg("error getting the SMTP configurations")
 	}
 
-	auth := smtp.PlainAuth("", smtpConfig.SmtpUser, smtpConfig.SmtpPassword, smtpConfig.SmtpServer)
-	addr := fmt.Sprintf("%s:%s", smtpConfig.SmtpServer, smtpConfig.SmtpPort)
+	auth := smtp.PlainAuth("", smtp.SmtpUser, smtp.SmtpPassword, smtp.SmtpServer)
+	addr := fmt.Sprintf("%s:%s", smtp.SmtpServer, smtp.SmtpPort)
 
-	err = smtp.SendMail(addr, auth, smtpConfig.EmailFrom, []string{smtpConfig.EmailTo}, []byte(message))
+	err = smtp.SendMail(addr, auth, smtp.EmailFrom, []string{smtp.EmailTo}, []byte(message))
 	if err != nil {
 		log.Warn().Err(err).Msg("Failed to send alert")
 		return
 	}
 
 	log.Info().Msg("CPU Alert Successfully Sent!")
+}
+
+func sendBatteryAlert(batteryLevel float64) {
+	subject := fmt.Sprintf("⚠️🪫 Battery Level Low Alert! 🪫⚠️ Battery Level: %.2f", batteryLevel)
+	body := fmt.Sprintf("The Battery Level for %s has dropped below %.2f. Current Battery Levl: %.2f", ComputerMonitoring, BatteryThreshold, batteryLevel)
+	message := fmt.Sprintf("Subject: %s\r\n\n\n%s", subject, body)
+
+	smtp, err := alerts.ConfigSMTP()
+	if err != nil {
+		log.Warn().Err(err).Msg("error getting the SMTP configurations")
+	}
+
+	auth := smtp.PlainAuth("", smtp.SmtpUser, smtp.SmtpPassword, smtp.SmtpServer)
+	addr := fmt.Sprintf("%s:%s", smtp.SmtpServer, smtp.SmtpPort)
+
+	err = smtp.SendMail(addr, auth, smtp.EmailFrom, []string{smtp.EmailTo}, []byte(message))
+	if err != nil {
+		log.Warn().Err(err).Msg("Failed to send alert")
+		return
+	}
+
+	log.Info().Msg("Low Battery Alert Successfully Sent!")
 }
